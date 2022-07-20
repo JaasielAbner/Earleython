@@ -1,5 +1,5 @@
 # Earleython
-Implementation of Earley algorithm in python. Early is a word parser based on grammar-free languages.
+Implementation of Earley algorithm in python. Early is a word parser based on context-free grammar.
 
 ## ToDo:
 
