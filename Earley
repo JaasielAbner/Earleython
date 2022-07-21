@@ -1,0 +1,70 @@
+
+
+#   expected exec example:
+'''
+    Linguagem: 
+
+        S -> aTb | bTa
+        R -> XRX | S
+        T -> XTX | X | £
+        X -> a | b
+
+    Execucao:
+
+    Digite a variavel inicial:
+        S
+    Digite, separado por '|', as regras de S: (ex: AcB|BB|a|£)
+        aTb|bTa
+    Digite a proxima variavel: (deixe vazio para concluir)
+        R
+    Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
+        XRX|S
+    Digite a proxima variavel: (deixe vazio para concluir)
+        T
+    Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
+        XTX|X|£
+    Digite a proxima variavel: (deixe vazio para concluir)
+        X
+    Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
+        a|b
+    Digite a proxima variavel: (deixe vazio para concluir)
+
+    Ok, agora digite uma palavra a ser buscada:
+        aabb
+    A palavra foi encontrada! O caminho foi:
+    .aabb
+    S -> aTb
+    a.abb
+    T -> XTX (aXTXb)
+    X -> a (aaTXb)
+    aa.bb
+    T -> £ (aaXb)
+    X -> b (aabb)
+    aab.b
+    S -> aTb (aabb)
+    aabb.
+
+'''
+
+def createrule(V: str, rules: str):
+    return {V: rules.split('|')}
+
+def showrule(R: str, rule: list):
+    text = R + " -> "
+    for a in rule[R]:
+        text += str(a) + ' | '
+    return text[:-3]
+
+
+
+# functions tests
+
+p = createrule("S", "aTb|bTa")
+dic = dict(createrule("S", "aBc|bCb|£"))
+dic.update(createrule("R", "XRX|S"))
+print(dic)
+s = showrule("S", dic)
+print(s)
+print(showrule("R", dic))
+
+     
