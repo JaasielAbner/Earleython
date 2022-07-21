@@ -1,6 +1,3 @@
-from curses.ascii import islower, isupper
-
-
 
 #testing OOP usage:
 
@@ -48,7 +45,7 @@ class production:
             return False
         return True
 
-    def copy(self, num) -> production:
+    def copy(self, num):
         p = production(num, self.start, self.befdot, self.aftdot)
         return p
 
@@ -57,7 +54,7 @@ class word:
     befdot: list
     aftdot: list
 
-    def __init__(self, word: str) -> word:
+    def __init__(self, word: str):
         self.befdot = []
         self.aftdot = [x for x in word]
         for x in self.aftdot:
