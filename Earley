@@ -1,3 +1,85 @@
+from curses.ascii import islower, isupper
+
+
+
+#testing OOP usage:
+
+class grammar:
+
+    Vars: list
+    Term: list
+    Prod: dict
+    Star: str
+
+    def __init__(self) -> None:
+        self.Vars = []
+        self.Term = []
+        self.Prod = {}
+        self.Star = ""
+    
+    def addRule(self, V: str, O: str) -> None:
+        if V in self.Vars:
+            self.Prod[V] += O.split('|')
+        else:
+            self.Prod.update({V: O.split('|')})
+            self.Vars.insert(V)
+        for x in O:
+            if (islower(x) or x == '£') and x not in self.Term :
+                self.Term += x
+            
+    
+class production:
+
+    num: int
+    start: str
+    befdot: list
+    aftdot: list
+
+    def __init__(self, num, start, befdot, aftdot) -> None:
+        self.num = num
+        self.start = start
+        self.befdot = befdot
+        self.aftdot = aftdot
+    
+    def advance(self) -> bool:
+        if self.aftdot:
+            self.befdot.append(self.aftdot.pop(0))
+        else:
+            return False
+        return True
+
+    def copy(self, num) -> production:
+        p = production(num, self.start, self.befdot, self.aftdot)
+        return p
+
+class word:
+
+    befdot: list
+    aftdot: list
+
+    def __init__(self, word: str) -> word:
+        self.befdot = []
+        self.aftdot = [x for x in word]
+        for x in self.aftdot:
+            if not (islower(x) or x == '£') :
+                return []
+        return self
+
+
+class step:
+
+    num: int
+    prods: list
+    word: word
+
+    def addProd(self, prod: production) -> bool:
+        if prod in self.prods:
+            return False
+        self.prods.insert(prod)
+        return True
+
+
+
 
 
 #   expected exec example:
