@@ -1,30 +1,19 @@
 
 #testing OOP usage:
 
-class grammar:
+class word:
 
-    Vars: list
-    Term: list
-    Prod: dict
-    Star: str
+    befdot: list
+    aftdot: list
 
-    def __init__(self) -> None:
-        self.Vars = []
-        self.Term = []
-        self.Prod = {}
-        self.Star = ""
-    
-    def addRule(self, V: str, O: str) -> None:
-        if V in self.Vars:
-            self.Prod[V] += O.split('|')
-        else:
-            self.Prod.update({V: O.split('|')})
-            self.Vars.insert(V)
-        for x in O:
-            if (islower(x) or x == '£') and x not in self.Term :
-                self.Term += x
-            
-    
+    def __init__(self, word: str):
+        self.befdot = []
+        self.aftdot = [x for x in word]
+        for x in self.aftdot:
+            if not (x.islower()):
+                print("palavra invalida")
+                return []
+
 class production:
 
     num: int
@@ -49,19 +38,6 @@ class production:
         p = production(num, self.start, self.befdot, self.aftdot)
         return p
 
-class word:
-
-    befdot: list
-    aftdot: list
-
-    def __init__(self, word: str):
-        self.befdot = []
-        self.aftdot = [x for x in word]
-        for x in self.aftdot:
-            if not (islower(x) or x == '£') :
-                return []
-        return self
-
 
 class step:
 
@@ -69,11 +45,78 @@ class step:
     prods: list
     word: word
 
+    def __init__(self, num: int, word: word) -> None:
+        self.prods = []
+        self.num = num
+        self.word = word
+
     def addProd(self, prod: production) -> bool:
-        if prod in self.prods:
-            return False
-        self.prods.insert(prod)
+        for pro in self.prods:
+            if prod.num == pro.num and prod.start == pro.start and prod.aftdot == pro.aftdot and prod.befdot == pro.befdot:
+                print("Esta regra ja existe")
+                return False
+        self.prods.append(prod)
         return True
+
+
+class grammar:
+
+    Vars: list
+    Term: list
+    Prod: dict
+    Star: str
+
+    def __init__(self) -> None:
+        self.Vars = []
+        self.Term = []
+        self.Prod = {}
+        self.Star = ""
+    
+    def addRule(self, V: str, O: str) -> None:
+        if V in self.Vars:
+            self.Prod[V] += O.split('|')
+        else:
+            self.Prod.update({V: O.split('|')})
+            self.Vars.append(V)
+
+        for x in O:
+            if (x == '|'):
+                pass
+            elif (x.islower() or x == '£') and x not in self.Term :
+                self.Term.append(x)
+            elif(x.isupper() and (x not in self.Vars)) :
+                self.Vars.append(x)
+                self.Prod.update({x: []})
+        print(*self.Vars)
+        print(*self.Term)
+
+    def init(self, w: str) -> step:
+        step0 = step(0, word(w))
+        for p in self.Prod['S']:
+            pro = production(0, "S", [], p)
+            step0.addProd(pro)
+        for p in step0.prods:
+            if p.aftdot[0].isupper() :
+                for p1 in self.Prod[p.aftdot[0]]:
+                    pro = production(0, p.aftdot[0], [], p1)
+                    step0.addProd(pro)
+
+        #Must be a function -> printing productions of a step
+        for p in step0.prods:
+            print(p.start, "->", str(p.befdot if (len(p.befdot)) else '' ) + '.' + str(p.aftdot) + '/' + str(p.num))        
+        return step0
+            
+
+    
+
+
+
+
+
+
+#   Def of functions:
+
+
 
 
 
@@ -145,5 +188,9 @@ print(dic)
 s = showrule("S", dic)
 print(s)
 print(showrule("R", dic))
-
+g = grammar()
+g.addRule("S", "aBc|bCb|£")
+g.addRule("S", "RTb|bTa")
+g.addRule("R", "XRX|S")
+step0 = g.init("aabb")
      
