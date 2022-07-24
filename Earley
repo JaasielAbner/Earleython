@@ -6,13 +6,20 @@ class word:
     befdot: list
     aftdot: list
 
-    def __init__(self, word: str):
+    def __init__(self, word: str) -> any:
         self.befdot = []
         self.aftdot = [x for x in word]
         for x in self.aftdot:
             if not (x.islower()):
                 print("palavra invalida")
                 return []
+    
+    def advance(self) -> bool:
+        if len(self.aftdot):
+            self.befdot.append(self.aftdot.pop(0))
+            return True
+        return False
+
 
 class production:
 
@@ -21,23 +28,28 @@ class production:
     befdot: list
     aftdot: list
 
-    def __init__(self, num, start, befdot, aftdot) -> None:
+    def __init__(self, num: int, start: str, befdot: list, aftdot: list) -> any:
         self.num = num
         self.start = start
         self.befdot = befdot
         self.aftdot = aftdot
-    
-    def advance(self) -> bool:
+
+    def advance(self) -> any:
         if self.aftdot:
+            self.aftdot = list(self.aftdot)
             self.befdot.append(self.aftdot.pop(0))
         else:
             return False
-        return True
+        return self
 
-    def copy(self, num):
+    def copy(self, num) -> any:
         p = production(num, self.start, self.befdot, self.aftdot)
         return p
-
+    
+    def compare(self, prod: any) -> bool:
+        if prod.num == self.num and prod.start == self.start and prod.aftdot == self.aftdot and prod.befdot == self.befdot:
+            return True
+        return False
 
 class step:
 
@@ -52,11 +64,15 @@ class step:
 
     def addProd(self, prod: production) -> bool:
         for pro in self.prods:
-            if prod.num == pro.num and prod.start == pro.start and prod.aftdot == pro.aftdot and prod.befdot == pro.befdot:
-                print("Esta regra ja existe")
+            if pro.compare(pro)  :
                 return False
         self.prods.append(prod)
         return True
+
+    def showProds(self) -> None:
+        for p in self.prods:
+            print(p.start, "->", str(p.befdot if (len(p.befdot)) else '' ) + '.' + str(p.aftdot) + '/' + str(p.num))        
+        
 
 
 class grammar:
@@ -65,12 +81,15 @@ class grammar:
     Term: list
     Prod: dict
     Star: str
+    step0: step
 
     def __init__(self) -> None:
         self.Vars = []
         self.Term = []
         self.Prod = {}
         self.Star = ""
+        self.step0 = step(0, "")
+
     
     def addRule(self, V: str, O: str) -> None:
         if V in self.Vars:
@@ -87,25 +106,56 @@ class grammar:
             elif(x.isupper() and (x not in self.Vars)) :
                 self.Vars.append(x)
                 self.Prod.update({x: []})
-        print(*self.Vars)
-        print(*self.Term)
 
-    def init(self, w: str) -> step:
-        step0 = step(0, word(w))
+    def init(self) -> bool:
         for p in self.Prod['S']:
             pro = production(0, "S", [], p)
-            step0.addProd(pro)
-        for p in step0.prods:
+            self.step0.addProd(pro)
+        for p in self.step0.prods:
             if p.aftdot[0].isupper() :
                 for p1 in self.Prod[p.aftdot[0]]:
                     pro = production(0, p.aftdot[0], [], p1)
-                    step0.addProd(pro)
-
-        #Must be a function -> printing productions of a step
-        for p in step0.prods:
-            print(p.start, "->", str(p.befdot if (len(p.befdot)) else '' ) + '.' + str(p.aftdot) + '/' + str(p.num))        
-        return step0
+                    self.step0.addProd(pro)
+        if len(self.step0.prods):
+            self.step0.showProds()
+            return True
+        return False
             
+    def validate(self, word: word) -> bool:
+        steps = [self.step0]
+        actstep = 0
+        actword = word
+
+        while actword.advance():
+            actstep += 1
+            stepr = step(actstep, actword)
+            # productions that can build the next symbol
+            for x in steps[actstep-1].prods :
+                if x.aftdot[0] == actword.aftdot[0] :
+                    stepr.addProd(x.copy(actstep).advance())
+            # productions that can derivate the next symbol
+            ps = stepr.prods
+            while ps == stepr.prods :
+                ps = stepr.prods
+                for x in stepr.prods :
+                    if x.aftdot[0].isupper() :
+                        for y in self.step0.prods :
+                            if x.aftdot[0] == y.start:
+                                stepr.addProd(y.copy(actstep))
+                # checking if a sub-word was produced
+                for x in stepr.prods :
+                    if x.aftdot == [] :
+                        for y in steps[x.num] :
+                            if y.aftdot[0] == x.start :
+                                stepr.addProd(y.advance())
+            steps.append()
+        # stop conditions
+        if len(actword.aftdot) == 0 :
+            for x in steps[-1].prods :
+                if len(x.aftdot) == 0 and x.befdot[-1] == actword.befdot[-1]:
+                    return True
+
+        return False
 
     
 
@@ -167,7 +217,7 @@ class grammar:
     aabb.
 
 '''
-
+'''
 def createrule(V: str, rules: str):
     return {V: rules.split('|')}
 
@@ -188,9 +238,11 @@ print(dic)
 s = showrule("S", dic)
 print(s)
 print(showrule("R", dic))
+'''
 g = grammar()
-g.addRule("S", "aBc|bCb|£")
-g.addRule("S", "RTb|bTa")
-g.addRule("R", "XRX|S")
-step0 = g.init("aabb")
+g.addRule("S", "aRc|Ab|£")
+g.addRule("A", "a|ARb")
+g.addRule("R", "Rc|a")
+g.init()
+print(g.validate(word("aac")))
      
