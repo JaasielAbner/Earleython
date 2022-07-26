@@ -1,170 +1,220 @@
+#   Def of functions:
 
-#testing OOP usage:
+def gerSymbol(D: list, a: str) -> list:
+   D1 = []
+   for p in D:
+      if p.nextchar() == a:
+         s = p.advance()
+         if s != False:
+            found = False
+            for y in D1:
+               if s.compare(y):
+                  found = True
+            if not found:
+               D1.append(s)
+               print("%-21s"%(s.start+ "->" + "".join(s.befdot) + '.' + "".join(s.aftdot) + '/' + str(s.num)))
+   return D1
+
+def gerVar(D: list, r: int, Prod: dict) -> list:
+   D1 = D
+   for p in D:
+      if p.nextchar().isupper():
+         for x in Prod[p.nextchar()]:
+            s = production(r, p.nextchar(), [], x)
+            found = False
+            for y in D1:
+               if s.compare(y):
+                  found = True
+            if not found:
+               D1.append(s)
+               # print("%-21s"%(s.start+ "->" + "".join(s.befdot) + '.' + "".join(s.aftdot) + '/' + str(s.num)),  "       (2)")
+   return D1
+
+def gerSub(D: list, steps: list) -> list:
+   D1 = D
+   for x in D1:
+      if x.nextchar() == "":
+         for y in steps[x.num].prods:
+            # print("%-21s"%(y.start+ "->" + "".join(y.befdot) + '.' + "".join(y.aftdot) + '/' + str(y.num)))
+            if y.nextchar() == x.start:
+               found = False
+               s = y.advance()
+               if s != False:
+                  for z in D1:
+                     if s.compare(z):
+                        found = True
+                  if not found:
+                     D1.append(s)
+                     # print("%-21s"%(s.start+ "->" + "".join(s.befdot) + '.' + "".join(s.aftdot) + '/' + str(s.num)),  "       (3)")
+   return D1
 
 class word:
 
-    befdot: list
-    aftdot: list
+   befdot: list
+   aftdot: list
 
-    def __init__(self, word: str) -> any:
-        self.befdot = []
-        self.aftdot = [x for x in word]
-        for x in self.aftdot:
-            if not (x.islower()):
-                print("palavra invalida")
-                return []
-    
-    def advance(self) -> bool:
-        if len(self.aftdot):
-            self.befdot.append(self.aftdot.pop(0))
-            return True
-        return False
+   def __init__(self, word: str) -> None:
+      self.befdot = []
+      self.aftdot = [x for x in word]
+      for x in self.aftdot:
+         if not (x.islower()):
+               print("palavra invalida")
+
+   def advance(self) -> bool:
+      if len(self.aftdot) != 0:
+         self.befdot.append(self.aftdot.pop(0))
+         return True
+      return False
+
+   def nextchar(self) -> str:
+      if self.aftdot:
+         return self.aftdot[0]
+      return ""
+
+   def lastchar(self) -> str:
+      if self.befdot:
+         return self.befdot[-1]
+      return ""
 
 
 class production:
 
-    num: int
-    start: str
-    befdot: list
-    aftdot: list
+   num: int
+   start: str
+   befdot: list
+   aftdot: list
 
-    def __init__(self, num: int, start: str, befdot: list, aftdot: list) -> any:
-        self.num = num
-        self.start = start
-        self.befdot = befdot
-        self.aftdot = aftdot
+   def __init__(self, num: int, start: str, befdot: list, aftdot: list) -> any:
+      self.num = num
+      self.start = start
+      self.befdot = befdot
+      self.aftdot = aftdot
 
-    def advance(self) -> any:
-        if self.aftdot:
-            self.aftdot = list(self.aftdot)
-            self.befdot.append(self.aftdot.pop(0))
-        else:
-            return False
-        return self
+   def advance(self) -> any:
+      if self.aftdot:
+         self.aftdot = list(self.aftdot)
+         self.befdot.append(self.aftdot.pop(0))
+      else:
+         return False
+      return self
 
-    def copy(self, num) -> any:
-        p = production(num, self.start, self.befdot, self.aftdot)
-        return p
-    
-    def compare(self, prod: any) -> bool:
-        if prod.num == self.num and prod.start == self.start and prod.aftdot == self.aftdot and prod.befdot == self.befdot:
-            return True
-        return False
+   def copy(self, num) -> any:
+      p = production(num, self.start, self.befdot, self.aftdot)
+      return p
+
+   def compare(self, prod: any) -> bool:
+      if prod.num == self.num and prod.start == self.start and prod.aftdot == self.aftdot and prod.befdot == self.befdot:
+         return True
+      return False
+
+   def nextchar(self) -> str:
+      if self.aftdot:
+         return self.aftdot[0]
+      return ""
+
+   def lastchar(self) -> str:
+      if self.befdot:
+         return self.befdot[-1]
+      return ""
+
 
 class step:
 
-    num: int
-    prods: list
-    word: word
+   num: int
+   prods: list
+   word: word
 
-    def __init__(self, num: int, word: word) -> None:
-        self.prods = []
-        self.num = num
-        self.word = word
+   def __init__(self, num: int, word: word) -> None:
+      self.prods = []
+      self.num = num
+      self.word = word
 
-    def addProd(self, prod: production) -> bool:
-        for pro in self.prods:
-            if pro.compare(pro)  :
-                return False
-        self.prods.append(prod)
-        return True
+   def addProd(self, prod: production) -> bool:
+      for pro in self.prods:
+         if pro.compare(prod):
+               return False
+      self.prods.append(prod)
+      return True
 
-    def showProds(self) -> None:
-        for p in self.prods:
-            print(p.start, "->", str(p.befdot if (len(p.befdot)) else '' ) + '.' + str(p.aftdot) + '/' + str(p.num))        
-        
+   def showProds(self) -> None:
+      for p in self.prods:
+         print(p.start, "->", "{}.{}/{}".format("".join(p.befdot) , "".join(p.aftdot), p.num))
 
 
 class grammar:
 
-    Vars: list
-    Term: list
-    Prod: dict
-    Star: str
-    step0: step
+   V: list
+   T: list
+   P: dict
+   S: str
+   step0: step
 
-    def __init__(self) -> None:
-        self.Vars = []
-        self.Term = []
-        self.Prod = {}
-        self.Star = ""
-        self.step0 = step(0, "")
+   def __init__(self) -> None:
+      self.V = []
+      self.T = []
+      self.P = {}
+      self.S = ""
+      self.step0 = step(0, "")
 
-    
-    def addRule(self, V: str, O: str) -> None:
-        if V in self.Vars:
-            self.Prod[V] += O.split('|')
-        else:
-            self.Prod.update({V: O.split('|')})
-            self.Vars.append(V)
+   def addRule(self, V: str, O: str) -> None:
+      if V in self.V:
+         self.P[V] += O.split('|')
+      else:
+         self.P.update({V: O.split('|')})
+         self.V.append(V)
 
-        for x in O:
-            if (x == '|'):
-                pass
-            elif (x.islower() or x == '£') and x not in self.Term :
-                self.Term.append(x)
-            elif(x.isupper() and (x not in self.Vars)) :
-                self.Vars.append(x)
-                self.Prod.update({x: []})
+      for x in O:
+         if (x == '|'):
+               pass
+         elif (x.islower() or x == '£') and x not in self.T:
+               self.T.append(x)
+         elif(x.isupper() and (x not in self.V)):
+               self.V.append(x)
+               self.P.update({x: []})
 
-    def init(self) -> bool:
-        for p in self.Prod['S']:
-            pro = production(0, "S", [], p)
-            self.step0.addProd(pro)
-        for p in self.step0.prods:
-            if p.aftdot[0].isupper() :
-                for p1 in self.Prod[p.aftdot[0]]:
-                    pro = production(0, p.aftdot[0], [], p1)
-                    self.step0.addProd(pro)
-        if len(self.step0.prods):
-            self.step0.showProds()
-            return True
-        return False
-            
-    def validate(self, word: word) -> bool:
-        steps = [self.step0]
-        actstep = 0
-        actword = word
+   def init(self) -> bool:
+      for p in self.P['S']:
+         pro = production(0, "S", [], p)
+         self.step0.addProd(pro)
+      for p in self.step0.prods:
+         if p.nextchar().isupper():
+               for p1 in self.P[p.aftdot[0]]:
+                  pro = production(0, p.aftdot[0], [], p1)
+                  self.step0.addProd(pro)
+      if len(self.step0.prods):
+         self.step0.showProds()
+         return True
+      return False
 
-        while actword.advance():
-            actstep += 1
-            stepr = step(actstep, actword)
-            # productions that can build the next symbol
-            for x in steps[actstep-1].prods :
-                if x.aftdot[0] == actword.aftdot[0] :
-                    stepr.addProd(x.copy(actstep).advance())
+   def validate(self, word: word) -> bool:
+      steps = [self.step0]
+      actstep = 0
+      actword = word
+
+      while actstep <= len(actword.befdot) + len(actword.aftdot) + 1:
+         actstep += 1
+         steps.append(step(actstep, actword))
+         # stop conditions
+         if actword.nextchar() == "":
+            for x in steps[actstep-1].prods:
+               if x.aftdot == [] :
+                  if x.lastchar() == actword.lastchar():
+                     return True
+         print(actstep, "===============================", actword.nextchar())
+         # productions that can build the next symbol
+         steps[actstep].prods = gerSymbol(steps[actstep -1].prods, actword.nextchar())
+         # if len(steps[actstep].prods) == 0:
+         #    return False
+         proda = []
+         while proda != steps[actstep].prods :
+            proda = steps[actstep].prods
             # productions that can derivate the next symbol
-            ps = stepr.prods
-            while ps == stepr.prods :
-                ps = stepr.prods
-                for x in stepr.prods :
-                    if x.aftdot[0].isupper() :
-                        for y in self.step0.prods :
-                            if x.aftdot[0] == y.start:
-                                stepr.addProd(y.copy(actstep))
-                # checking if a sub-word was produced
-                for x in stepr.prods :
-                    if x.aftdot == [] :
-                        for y in steps[x.num] :
-                            if y.aftdot[0] == x.start :
-                                stepr.addProd(y.advance())
-            steps.append()
-        # stop conditions
-        if len(actword.aftdot) == 0 :
-            for x in steps[-1].prods :
-                if len(x.aftdot) == 0 and x.befdot[-1] == actword.befdot[-1]:
-                    return True
-
-        return False
-
-    
-
-
-
-
-
-
-#   Def of functions:
+            steps[actstep].prods = gerVar(steps[actstep].prods, actstep, self.P)
+            # checking if a sub-word was produced
+            steps[actstep].prods = gerSub(steps[actstep].prods, steps)
+         # steps[actstep].showProds()
+         actword.advance()
+      return False
 
 
 
@@ -173,76 +223,70 @@ class grammar:
 
 
 #   expected exec example:
-'''
-    Linguagem: 
+#     Linguagem:
 
-        S -> aTb | bTa
-        R -> XRX | S
-        T -> XTX | X | £
-        X -> a | b
+#         S -> aTb | bTa
+#         R -> XRX | S
+#         T -> XTX | X | £
+#         X -> a | b
 
-    Execucao:
+#     Execucao:
 
-    Digite a variavel inicial:
-        S
-    Digite, separado por '|', as regras de S: (ex: AcB|BB|a|£)
-        aTb|bTa
-    Digite a proxima variavel: (deixe vazio para concluir)
-        R
-    Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
-        XRX|S
-    Digite a proxima variavel: (deixe vazio para concluir)
-        T
-    Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
-        XTX|X|£
-    Digite a proxima variavel: (deixe vazio para concluir)
-        X
-    Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
-        a|b
-    Digite a proxima variavel: (deixe vazio para concluir)
+#     Digite a variavel inicial:
+#         S
+#     Digite, separado por '|', as regras de S: (ex: AcB|BB|a|£)
+#         aTb|bTa
+#     Digite a proxima variavel: (deixe vazio para concluir)
+#         R
+#     Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
+#         XRX|S
+#     Digite a proxima variavel: (deixe vazio para concluir)
+#         T
+#     Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
+#         XTX|X|£
+#     Digite a proxima variavel: (deixe vazio para concluir)
+#         X
+#     Digite, separado por '|', as regras de R: (ex: AcB|BB|a|£)
+#         a|b
+#     Digite a proxima variavel: (deixe vazio para concluir)
 
-    Ok, agora digite uma palavra a ser buscada:
-        aabb
-    A palavra foi encontrada! O caminho foi:
-    .aabb
-    S -> aTb
-    a.abb
-    T -> XTX (aXTXb)
-    X -> a (aaTXb)
-    aa.bb
-    T -> £ (aaXb)
-    X -> b (aabb)
-    aab.b
-    S -> aTb (aabb)
-    aabb.
+#     Ok, agora digite uma palavra a ser buscada:
+#         aabb
+#     A palavra foi encontrada! O caminho foi:
+#     .aabb
+#     S -> aTb
+#     a.abb
+#     T -> XTX (aXTXb)
+#     X -> a (aaTXb)
+#     aa.bb
+#     T -> £ (aaXb)
+#     X -> b (aabb)
+#     aab.b
+#     S -> aTb (aabb)
+#     aabb.
 
-'''
-'''
-def createrule(V: str, rules: str):
-    return {V: rules.split('|')}
+# def createrule(V: str, rules: str):
+#     return {V: rules.split('|')}
 
-def showrule(R: str, rule: list):
-    text = R + " -> "
-    for a in rule[R]:
-        text += str(a) + ' | '
-    return text[:-3]
+# def showrule(R: str, rule: list):
+#     text = R + " -> "
+#     for a in rule[R]:
+#         text += str(a) + ' | '
+#     return text[:-3]
 
 
+# # functions tests
 
-# functions tests
-
-p = createrule("S", "aTb|bTa")
-dic = dict(createrule("S", "aBc|bCb|£"))
-dic.update(createrule("R", "XRX|S"))
-print(dic)
-s = showrule("S", dic)
-print(s)
-print(showrule("R", dic))
-'''
+# p = createrule("S", "aTb|bTa")
+# dic = dict(createrule("S", "aBc|bCb|£"))
+# dic.update(createrule("R", "XRX|S"))
+# print(dic)
+# s = showrule("S", dic)
+# print(s)
+# print(showrule("R", dic))
 g = grammar()
-g.addRule("S", "aRc|Ab|£")
-g.addRule("A", "a|ARb")
-g.addRule("R", "Rc|a")
+g.addRule("S", "aB|bA")
+g.addRule("A", "a|aS|bAA")
+g.addRule("B", "b|bS|aBB")
 g.init()
-print(g.validate(word("aac")))
-     
+print(g.validate(word("abab")))
